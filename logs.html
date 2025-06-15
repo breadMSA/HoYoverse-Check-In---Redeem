@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HoYoverse Check-In & Redeem Logs</title>
+  <meta charset="UTF-8">
+  <style>
+    /* 頁面基本樣式 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    /* 標題和控制區域 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .button {
+      background-color: #4a8af4;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .button:hover {
+      opacity: 0.9;
+    }
+    
+    .button.danger {
+      background-color: #f44336;
+    }
+    
+    /* 標籤頁樣式 */
+    .nav-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .nav-tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      margin-right: 5px;
+      border-radius: 4px 4px 0 0;
+    }
+    
+    .nav-tab.active {
+      background-color: white;
+      border-bottom-color: white;
+    }
+    
+    /* 內容區域樣式 */
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* 日誌列表樣式 */
+    .logs-list {
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    
+    .log-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    
+    .log-item:last-child {
+      border-bottom: none;
+    }
+    
+    .log-timestamp {
+      color: #666;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+    
+    /* 代碼列表樣式 */
+    .codes-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .code-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .code-item:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .empty-logs {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+    }
+    
+    /* 添加代碼計數樣式 */
+    .codes-count {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    /* 遊戲計數樣式 */
+    .game-count {
+      display: inline-block;
+      padding: 3px 6px;
+      margin: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: white;
+    }
+    
+    .game-count.genshin {
+      background-color: #4a8af4;
+    }
+    
+    .game-count.starrail {
+      background-color: #9c27b0;
+    }
+    
+    .game-count.zzz {
+      background-color: #ff9800;
+    }
+    
+    .game-count.honkai3rd {
+      background-color: #e91e63;
+    }
+    
+    .game-count.unknown {
+      background-color: #999;
+    }
+    
+    /* 遊戲分組標題樣式 */
+    .game-header {
+      padding: 8px 10px;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      font-weight: bold;
+      border-radius: 4px;
+      color: white;
+    }
+    
+    .game-header.genshin {
+      background-color: #4a8af4;
+    }
+    
+    .game-header.starrail {
+      background-color: #9c27b0;
+    }
+    
+    .game-header.zzz {
+      background-color: #ff9800;
+    }
+    
+    .game-header.honkai3rd {
+      background-color: #e91e63;
+    }
+    
+    .game-header.unknown {
+      background-color: #999;
+    }
+    
+    /* 遊戲徽章樣式 */
+    .game-badge {
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .game-badge.genshin {
+      background-color: #4a8af4;
+    }
+    
+    .game-badge.starrail {
+      background-color: #9c27b0;
+    }
+    
+    .game-badge.zzz {
+      background-color: #ff9800;
+    }
+    
+    .game-badge.honkai3rd {
+      background-color: #e91e63;
+    }
+    
+    .game-badge.unknown {
+      background-color: #999;
+    }
+    
+    /* 狀態徽章樣式 */
+    .status-badge {
+      margin-left: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: white;
+    }
+    
+    .status-badge.success {
+      background-color: #4caf50;
+    }
+    
+    .status-badge.failed {
+      background-color: #f44336;
+    }
+    
+    .status-badge.already {
+      background-color: #ff9800;
+    }
+    
+    /* 按鈕樣式 */
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    
+    .action-btn {
+      background-color: #4a8af4;
+      color: white;
+    }
+    
+    .danger-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+    }
+    
+    /* 過濾器容器 */
+    .filter-container {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-container label {
+      margin-right: 10px;
+    }
+    
+    .filter-container select {
+      padding: 6px;
+      margin-right: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-tab="logs-tab">操作日誌</div>
+    <div class="nav-tab" data-tab="codes-tab">已兌換代碼</div>
+  </div>
+  
+  <div id="logs-tab" class="tab-content active">
+    <div class="logs-container">
+      <div id="logs-list" class="logs-list"></div>
+    </div>
+  </div>
+  
+  <div id="codes-tab" class="tab-content">
+    <div class="filter-container">
+      <label>篩選遊戲：</label>
+      <select id="game-filter">
+        <option value="all">全部遊戲</option>
+        <option value="genshin">原神</option>
+        <option value="starrail">崩壞：星穹鐵道</option>
+        <option value="zzz">絕區零</option>
+        <option value="honkai3rd">崩壞3rd</option>
+      </select>
+      <button id="clear-codes" class="danger-btn">清除所有代碼</button>
+      <button id="cleanup-busy-codes" class="action-btn">清理System Busy代碼</button>
+      <button id="convert-codes" class="action-btn">轉換舊格式代碼</button>
+    </div>
+    <div class="codes-container">
+      <ul id="codes-list" class="codes-list"></ul>
+    </div>
+  </div>
+  
+  <script src="logs.js"></script>
+  <script src="reset.js"></script>
+</body>
+</html> 

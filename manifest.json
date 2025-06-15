@@ -1,0 +1,39 @@
+{
+   "manifest_version": 3,
+   "name": "HoYoverse Check-In & Redeem",
+   "version": "1.0.0",
+   "description": "Automatically checks in for all HoYoverse games and redeems codes.",
+   "icons": {
+      "16": "icons/main/icon96.png",
+      "32": "icons/main/icon96.png",
+      "48": "icons/main/icon96.png",
+      "96": "icons/main/icon96.png"
+   },
+   "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+         "16": "icons/main/icon96.png",
+         "32": "icons/main/icon96.png",
+         "48": "icons/main/icon96.png"
+      }
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "permissions": [
+      "storage",
+      "cookies",
+      "alarms",
+      "tabs",
+      "webRequest"
+   ],
+   "host_permissions": [
+      "*://*.hoyolab.com/*",
+      "*://*.hoyoverse.com/*",
+      "*://*.mihoyo.com/*",
+      "*://*.ennead.cc/*"
+   ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "author": "Bread",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt4o5+oAVDm6OAaSL61kEspfS//V9SGruBhADrvidaBI2KeBPJN+DjwtaWAPz1uVrim51xZQQ6ZfmQMih3aXgLAWceMvw3GnacdID+F3cjreNKiSMAq+sEBDEwXyxySNwiCik1y/4QBKi5uaQSqGgLlwIjqlQpRnmp4DwxobZjQYHFmMjcwE+gIwJBkTIiayPRy/AoYGcKdcVsJelKATThEa9CcBk8T1yGpiS6ZYxjYCKpi2hVKVcwvbH2wVlXw3yvpsni2Eg2899y96Z+8Sj4FBmEQRjBXDqZUzq1Xjg8edPusqL6B3rsXfim9c6FFUBqjN8vP7WgUKFENM2qL31QwIDAQAB"
+}

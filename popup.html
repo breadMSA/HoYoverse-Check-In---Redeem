@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HoYoverse Check-In & Redeem</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'Arial', sans-serif;
+      margin: 0;
+      padding: 15px;
+      width: 380px;
+      max-width: 100%;
+      color: #333;
+      overflow-x: hidden;
+    }
+    
+    .header-block {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      padding-bottom: 0;
+      position: relative;
+    }
+    
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0;
+    }
+    
+    .description-text {
+      text-align: left;
+      font-size: 13px;
+      color: #6c757d;
+      margin-top: 0;
+      margin-bottom: 0;
+      max-width: 300px;
+      margin-left: 0;
+      margin-right: auto;
+    }
+    
+    .language-switcher {
+      display: flex;
+      align-items: center;
+    }
+    
+    .lang-btn {
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .lang-btn:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    .lang-btn:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .lang-btn.active {
+      background: #4c9eea;
+      color: white;
+      border-color: #4c9eea;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    .button {
+      background-color: #4c9eea;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .button:hover {
+      background-color: #3a8cd9;
+    }
+    
+    .save-result {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #d4edda;
+      color: #155724;
+      text-align: center;
+    }
+    
+    .credentials-display {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .credentials-display .email {
+      font-weight: bold;
+    }
+    
+    .auth-status {
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .auth-status.logged-in {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .auth-status.not-logged-in {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .toggle-label {
+      flex: 1;
+      cursor: pointer;
+    }
+    
+    /* Improved Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+      margin-left: 10px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #4c9eea;
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px #4c9eea;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+    
+    .game-status {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+    
+    .game-status.success {
+      border-left: 3px solid #28a745;
+    }
+    
+    .game-status.pending {
+      border-left: 3px solid #ffc107;
+    }
+    
+    .game-status .game-name {
+      font-weight: bold;
+    }
+    
+    .status-text {
+      font-weight: normal;
+    }
+    
+    .status-text.success {
+      color: #28a745;
+    }
+    
+    .status-text.error {
+      color: #dc3545;
+    }
+    
+    .status-text.pending {
+      color: #ffc107;
+    }
+    
+    .status-time {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+    
+    .action-buttons .button {
+      width: 48%;
+    }
+    
+    .status-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    #footer {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 15px;
+    }
+    
+    .tab-container {
+      margin-bottom: 15px;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .tab {
+      padding: 8px 15px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      margin-right: 5px;
+    }
+    
+    .tab.active {
+      background-color: #fff;
+      border-color: #ddd;
+      margin-bottom: -1px;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 15px 0;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* 修改信息圖標樣式 */
+    .info-icon {
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 10px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .language-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .info-popup {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .info-popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 320px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .info-close {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    
+    /* 修改語言切換器樣式 */
+    .lang-en.active {
+      background: #4c9eea;
+      color: white;
+      border-color: #4c9eea;
+    }
+    
+    .lang-zh.active {
+      background: #4c9eea;
+      color: white;
+      border-color: #4c9eea;
+    }
+    
+    .status-container {
+      margin-top: 10px;
+    }
+    
+    .game-status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 5px;
+      border-radius: 4px;
+      background-color: #f8f8f8;
+    }
+    
+    .game-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      background-color: #f0f0f0;
+      border-radius: 50%;
+    }
+    
+    .game-icon img {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .game-name {
+      flex: 1;
+      font-weight: bold;
+    }
+    
+    .status {
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    
+    .status.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .status.failed {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status.pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .status-message {
+      margin-top: 5px;
+      padding: 5px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    /* 添加日誌按鈕樣式 */
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .button-row .button {
+      flex-grow: 1;
+      flex-basis: 0;
+      text-align: center;
+      padding: 8px 10px;
+      min-width: 100px;
+    }
+    
+    .section-description {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: -5px;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    
+    /* 美化兌換碼界面 */
+    #redeem-section {
+      background-color: #f5f7fa;
+      border-radius: 6px;
+      padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .select-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    #code-input {
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+    
+    #code-input:focus {
+      border-color: #4c9eea;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(76,158,234,0.2);
+    }
+    
+    #redeem-button {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      background-color: #4c9eea;
+      transition: background-color 0.2s;
+    }
+    
+    #redeem-button:hover {
+      background-color: #3a8cd9;
+    }
+    
+    #redeem-status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="info-popup hidden">
+    <div class="info-popup-content">
+      <span class="lang-en-text">This extension automatically checks in for HoYoverse games daily and redeems available redemption codes. You only have to login and input your UIDs once. The extension will run in the background automatically.You can manually check in and redeem codes by using the buttons in this popup. Although it is usually not necessary to do it this way.</span>
+      <span class="lang-zh-text hidden">此擴充功能會自動為HoYoverse遊戲進行每日簽到並兌換可用的兌換碼。只需在首次安裝時登入並輸入UIDs，之後便可自動在背景執行。您也可以使用此彈出視窗中的按鈕手動簽到和兌換，雖然通常不需要手動進行這些程序。</span>
+      <div class="info-close">×</div>
+    </div>
+  </div>
+
+  <div class="header-block">
+    <div class="header">
+      <div class="title">
+        <span class="lang-en-text">HoYoverse Check-In & Redeem</span>
+        <span class="lang-zh-text hidden">HoYoverse 簽到&兌換助手</span>
+      </div>
+      <div class="language-container">
+        <div class="info-icon">ℹ️</div>
+        <div class="language-switcher">
+          <div class="lang-btn lang-en active">EN</div>
+          <div class="lang-btn lang-zh">中文</div>
+        </div>
+      </div>
+    </div>
+    
+    <p class="description-text">
+      <span class="lang-en-text">Auto daily check-ins and code redemptions.</span>
+      <span class="lang-zh-text hidden">在背景全自動簽到&兌換兌換碼。</span>
+    </p>
+  </div>
+  
+  <div id="auth-status" class="auth-status not-logged-in">
+    <span class="lang-en-text">Checking authentication status...</span>
+    <span class="lang-zh-text hidden">正在檢查認證狀態...</span>
+  </div>
+  
+  <!-- Login Form -->
+  <div id="credentials-form" class="section">
+    <div class="section-title">
+      <span class="lang-en-text">HoYoLAB Account</span>
+      <span class="lang-zh-text hidden">HoYoLAB 帳戶</span>
+    </div>
+    <div class="form-group">
+      <label for="hoyolab-username">
+        <span class="lang-en-text">Email:</span>
+        <span class="lang-zh-text hidden">電子郵件:</span>
+      </label>
+      <input type="text" id="hoyolab-username" placeholder="yourname@example.com">
+    </div>
+    <div class="form-group">
+      <label for="hoyolab-password">
+        <span class="lang-en-text">Password:</span>
+        <span class="lang-zh-text hidden">密碼:</span>
+      </label>
+      <input type="password" id="hoyolab-password">
+    </div>
+    <button id="save-credentials" class="button">
+      <span class="lang-en-text">Save Credentials</span>
+      <span class="lang-zh-text hidden">保存憑證</span>
+    </button>
+    <div id="credentials-saved" class="save-result hidden">
+      <span class="lang-en-text">Credentials saved!</span>
+      <span class="lang-zh-text hidden">憑證已保存！</span>
+    </div>
+  </div>
+  
+  <!-- Credentials Display -->
+  <div id="credentials-display" class="section hidden">
+    <div class="section-title">
+      <span class="lang-en-text">HoYoLAB Account</span>
+      <span class="lang-zh-text hidden">HoYoLAB 帳戶</span>
+    </div>
+    <div class="credentials-display">
+      <div>
+        <span class="lang-en-text">Logged in as: </span>
+        <span class="lang-zh-text hidden">已登入為: </span>
+        <span class="email lang-en-text" id="logged-email"></span>
+        <span class="email lang-zh-text hidden" id="logged-email-zh"></span>
+      </div>
+      <button id="change-credentials" class="button">
+        <span class="lang-en-text">Change</span>
+        <span class="lang-zh-text hidden">更改</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- UID Input -->
+  <div class="section">
+    <div class="section-title">
+      <span class="lang-en-text">Game UIDs</span>
+      <span class="lang-zh-text hidden">遊戲 UID</span>
+    </div>
+    <div class="form-group">
+      <label for="genshin-uid">
+        <span class="lang-en-text">Genshin Impact UID:</span>
+        <span class="lang-zh-text hidden">原神 UID:</span>
+      </label>
+      <input type="text" id="genshin-uid" placeholder="9 digits">
+    </div>
+    <div class="form-group">
+      <label for="starrail-uid">
+        <span class="lang-en-text">Honkai: Star Rail UID:</span>
+        <span class="lang-zh-text hidden">崩壞：星穹鐵道 UID:</span>
+      </label>
+      <input type="text" id="starrail-uid" placeholder="9 digits">
+    </div>
+    <div class="form-group">
+      <label for="zzz-uid">
+        <span class="lang-en-text">Zenless Zone Zero UID:</span>
+        <span class="lang-zh-text hidden">絕區零 UID:</span>
+      </label>
+      <input type="text" id="zzz-uid" placeholder="9-10 digits">
+    </div>
+    <button id="save-uids" class="button">
+      <span class="lang-en-text">Save UIDs</span>
+      <span class="lang-zh-text hidden">保存 UID</span>
+    </button>
+    <div id="uids-saved" class="save-result hidden">
+      <span class="lang-en-text">UIDs saved!</span>
+      <span class="lang-zh-text hidden">UID 已保存！</span>
+    </div>
+  </div>
+  
+  <!-- Game Settings -->
+  <div class="section">
+    <div class="section-title">
+      <span class="lang-en-text">Game Check-In & Redeem Settings</span>
+      <span class="lang-zh-text hidden">遊戲簽到&兌換設置</span>
+    </div>
+    <div class="toggle-container">
+      <label for="genshin" class="toggle-label">
+        <span class="lang-en-text">Genshin Impact</span>
+        <span class="lang-zh-text hidden">原神</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="genshin" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-container">
+      <label for="starrail" class="toggle-label">
+        <span class="lang-en-text">Honkai: Star Rail</span>
+        <span class="lang-zh-text hidden">崩壞：星穹鐵道</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="starrail" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-container">
+      <label for="zzz" class="toggle-label">
+        <span class="lang-en-text">Zenless Zone Zero</span>
+        <span class="lang-zh-text hidden">絕區零</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="zzz" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-container">
+      <label for="honkai3rd" class="toggle-label">
+        <span class="lang-en-text">Honkai Impact 3rd</span>
+        <span class="lang-zh-text hidden">崩壞3rd</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="honkai3rd" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  
+  <!-- Check-in Status -->
+  <div class="section">
+    <div class="section-title">
+      <span class="lang-en-text">Check-in Status</span>
+      <span class="lang-zh-text hidden">簽到狀態</span>
+    </div>
+    <div class="status-container">
+      <div class="game-status">
+        <div class="game-icon"><img src="icons/main/primo.png" alt="Genshin Impact"></div>
+        <div class="game-name">
+          <span class="lang-en-text">Genshin Impact</span>
+          <span class="lang-zh-text hidden">原神</span>
+        </div>
+        <div class="status" id="genshin-status">Checking...</div>
+      </div>
+      <div class="game-status">
+        <div class="game-icon"><img src="icons/main/jade.png" alt="Honkai: Star Rail"></div>
+        <div class="game-name">
+          <span class="lang-en-text">Honkai: Star Rail</span>
+          <span class="lang-zh-text hidden">崩壞：星穹鐵道</span>
+        </div>
+        <div class="status" id="starrail-status">Checking...</div>
+      </div>
+      <div class="game-status">
+        <div class="game-icon"><img src="icons/main/poly.png" alt="Zenless Zone Zero"></div>
+        <div class="game-name">
+          <span class="lang-en-text">Zenless Zone Zero</span>
+          <span class="lang-zh-text hidden">絕區零</span>
+        </div>
+        <div class="status" id="zzz-status">Checking...</div>
+      </div>
+      <div class="game-status">
+        <div class="game-icon"><img src="icons/main/crystal.png" alt="Honkai Impact 3rd"></div>
+        <div class="game-name">
+          <span class="lang-en-text">Honkai Impact 3rd</span>
+          <span class="lang-zh-text hidden">崩壞3rd</span>
+        </div>
+        <div class="status" id="honkai3rd-status">Checking...</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Actions -->
+  <div class="section">
+    <div class="section-title">
+      <span class="lang-en-text">Manual Actions</span>
+      <span class="lang-zh-text hidden">手動操作</span>
+    </div>
+    <p class="section-description">
+      <span class="lang-en-text">This extension automates check-ins and code redemptions. Manual actions are usually not required.</span>
+      <span class="lang-zh-text hidden">此插件會自動簽到&兌換兌換碼，通常不需要手動執行這些動作。</span>
+    </p>
+    <div class="button-row">
+      <button id="check-now" class="button">
+        <span class="lang-en-text">Check-in Now</span>
+        <span class="lang-zh-text hidden">立即簽到</span>
+      </button>
+      <button id="check-codes-now" class="button">
+        <span class="lang-en-text">Check Codes</span>
+        <span class="lang-zh-text hidden">檢查兌換碼</span>
+      </button>
+      <button id="open-logs" class="button">
+        <span class="lang-en-text">View Logs</span>
+        <span class="lang-zh-text hidden">查看日誌</span>
+      </button>
+    </div>
+    <div id="status" class="status-message"></div>
+    <div id="check-codes-status" class="status-message"></div>
+  </div>
+  
+  <!-- Redeem Code -->
+  <div class="section" id="redeem-section">
+    <div class="section-title">
+      <span class="lang-en-text">Redeem Code</span>
+      <span class="lang-zh-text hidden">兌換碼</span>
+    </div>
+    <div class="form-group">
+      <label>
+        <span class="lang-en-text">Game:</span>
+        <span class="lang-zh-text hidden">遊戲:</span>
+      </label>
+      <select id="game-select" class="select-input">
+        <option value="genshin" data-en="Genshin Impact" data-zh="原神">Genshin Impact</option>
+        <option value="starrail" data-en="Honkai: Star Rail" data-zh="崩壞：星穹鐵道">Honkai: Star Rail</option>
+        <option value="zzz" data-en="Zenless Zone Zero" data-zh="絕區零">Zenless Zone Zero</option>
+        <option value="honkai3rd" data-en="Honkai Impact 3rd" data-zh="崩壞3rd">Honkai Impact 3rd</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>
+        <span class="lang-en-text">Redemption Code:</span>
+        <span class="lang-zh-text hidden">兌換碼:</span>
+      </label>
+      <input type="text" id="code-input" placeholder="Enter code">
+    </div>
+    <button id="redeem-button" class="button">
+      <span class="lang-en-text">Redeem</span>
+      <span class="lang-zh-text hidden">兌換</span>
+    </button>
+    <div id="redeem-status" class="status-message"></div>
+  </div>
+
+  <div id="footer">
+    <span class="lang-en-text">HoYoverse Check-In & Redeem v1.0.0 | Made by BreadWasEaten</span>
+    <span class="lang-zh-text hidden">HoYoverse 簽到&兌換助手 v1.0.0 | Made by BreadWasEaten</span>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

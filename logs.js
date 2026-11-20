@@ -354,6 +354,16 @@ function loadRedeemedCodes() {
               statusBadge.textContent = '✓';
               statusBadge.classList.add('already');
               break;
+            case 'expired':
+              statusBadge.textContent = '⌛';
+              statusBadge.classList.add('failed');
+              statusBadge.title = 'Expired';
+              break;
+            case 'invalid':
+              statusBadge.textContent = '✗';
+              statusBadge.classList.add('failed');
+              statusBadge.title = 'Invalid code';
+              break;
             default:
               statusBadge.textContent = '?';
           }

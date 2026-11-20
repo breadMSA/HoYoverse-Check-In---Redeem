@@ -477,11 +477,13 @@ const REDEEM_ENDPOINTS = {
 	},
 	starrail: {
 		url: 'https://sg-hkrpg-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey',
-		game_biz: 'hkrpg_global'
+		game_biz: 'hkrpg_global',
+		addTimestamp: true
 	},
 	zzz: {
 		url: 'https://public-operation-nap.hoyoverse.com/common/apicdkey/api/webExchangeCdkey',
 		game_biz: 'nap_global',
+		addTimestamp: true,
 		cookieOnly: true // the ZZZ endpoint is only sent the Cookie header
 	},
 	honkai3rd: {
@@ -587,9 +589,12 @@ async function redeemCode(game, uid, code) {
 			lang: 'en',
 			cdkey: code,
 			game_biz: endpoint.game_biz,
-			...(endpoint.extraParams || {}),
-			t: Date.now()
+			...(endpoint.extraParams || {})
 		};
+		// Same params as the original per-game code: only Star Rail and ZZZ sent t
+		if (endpoint.addTimestamp) {
+			params.t = Date.now();
+		}
 		for (const [key, value] of Object.entries(params)) {
 			url.searchParams.append(key, value);
 		}

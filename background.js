@@ -281,23 +281,40 @@ function performDailyCheckIn(forceCheck = false) {
 
 logToStorage("Extension initialized");
 
-const DAILY_CHECK_ALARM = "dailyCheckIn";
-const CODE_CHECK_ALARM = "codeCheck";
-const ALARM_PERIOD_MINUTES = 15;
+// Call authentication on startup
+authenticateHoYoLAB();
 
-// The service worker is restarted many times a day (every alarm, every popup open).
-// Alarms persist across restarts, so only create them when they are missing;
-// re-creating them on every wake would keep resetting their 15-minute timer.
-async function ensureAlarms() {
-	for (const name of [DAILY_CHECK_ALARM, CODE_CHECK_ALARM]) {
-		const existing = await browser.alarms.get(name);
-		if (!existing) {
-			await browser.alarms.create(name, { periodInMinutes: ALARM_PERIOD_MINUTES });
-			logToStorage(`定時器 ${name} 已創建 (每${ALARM_PERIOD_MINUTES}分鐘)`);
+// Set up daily check-in
+const DAILY_CHECK_ALARM = "dailyCheckIn";
+browser.alarms.create(DAILY_CHECK_ALARM, { periodInMinutes: 15 });
+
+// Set up hourly code redemption check
+const CODE_CHECK_ALARM = "codeCheck";
+browser.alarms.create(CODE_CHECK_ALARM, { periodInMinutes: 15 });
+
+// 記錄定時器創建
+logToStorage("定時器已創建: 每15分鐘檢查一次簽到和兌換碼");
+
+// 定期檢查定時器是否存在，如果不存在則重新創建
+setInterval(async function() {
+	try {
+		const alarms = await browser.alarms.getAll();
+		const hasCheckInAlarm = alarms.some(alarm => alarm.name === DAILY_CHECK_ALARM);
+		const hasCodeCheckAlarm = alarms.some(alarm => alarm.name === CODE_CHECK_ALARM);
+		
+		if (!hasCheckInAlarm) {
+			browser.alarms.create(DAILY_CHECK_ALARM, { periodInMinutes: 15 });
+			logToStorage("簽到定時器丟失，已重新創建");
 		}
+		
+		if (!hasCodeCheckAlarm) {
+			browser.alarms.create(CODE_CHECK_ALARM, { periodInMinutes: 15 });
+			logToStorage("兌換碼檢查定時器丟失，已重新創建");
+		}
+	} catch (error) {
+		logToStorage(`檢查定時器時出錯: ${error.message}`);
 	}
-}
-ensureAlarms().catch(error => logToStorage(`創建定時器時出錯: ${error.message}`));
+}, 5 * 60 * 1000); // 每5分鐘檢查一次
 
 // Handle alarms
 browser.alarms.onAlarm.addListener(function(alarm) {
@@ -312,14 +329,23 @@ browser.alarms.onAlarm.addListener(function(alarm) {
 });
 
 // 監聽擴展安裝或更新事件
-browser.runtime.onInstalled.addListener(async function(details) {
+browser.runtime.onInstalled.addListener(function(details) {
 	if (details.reason === "install") {
-		logToStorage("擴展已安裝");
+		logToStorage("擴展已安裝，創建定時器");
 	} else if (details.reason === "update") {
-		logToStorage(`擴展已更新到版本 ${browser.runtime.getManifest().version}`);
+		logToStorage(`擴展已更新到版本 ${browser.runtime.getManifest().version}，重新創建定時器`);
 	}
-	await ensureAlarms();
-	await cleanupSystemBusyCodes();
+	
+	// 創建或重新創建定時器
+	browser.alarms.clear(DAILY_CHECK_ALARM).then(() => {
+		browser.alarms.create(DAILY_CHECK_ALARM, { periodInMinutes: 15 });
+		logToStorage("簽到定時器已創建");
+	});
+	
+	browser.alarms.clear(CODE_CHECK_ALARM).then(() => {
+		browser.alarms.create(CODE_CHECK_ALARM, { periodInMinutes: 15 });
+		logToStorage("兌換碼檢查定時器已創建");
+	});
 });
 
 // Listen for messages from the popup
@@ -923,3 +949,13 @@ async function cleanupSystemBusyCodes() {
 		logToStorage(`Error cleaning up system_busy codes: ${error.message}`);
 	}
 }
+
+// Add event listener for extension initialization
+browser.runtime.onInstalled.addListener(async () => {
+	// ... existing code if any ...
+	
+	// Clean up system_busy codes
+	await cleanupSystemBusyCodes();
+	
+	// ... existing code if any ...
+});
